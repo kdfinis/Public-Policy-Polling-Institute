@@ -7,22 +7,44 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: {
+        DEFAULT: "1rem",
+        sm: "1.5rem",
+        md: "2rem",
+        lg: "2.5rem",
+        xl: "3rem",
+      },
       screens: {
-        "2xl": "1400px",
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1280px",
+        "2xl": "1536px",
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['"IBM Plex Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'monospace'],
+      },
       colors: {
         border: "hsl(var(--border))",
+        "border-subtle": "hsl(var(--border-subtle))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
+        background: {
+          DEFAULT: "hsl(var(--background))",
+          elevated: "hsl(var(--background-elevated))",
+        },
         foreground: "hsl(var(--foreground))",
+        surface: {
+          subtle: "hsl(var(--surface-subtle))",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
           hover: "hsl(var(--primary-hover))",
+          active: "hsl(var(--primary-active))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -37,6 +59,22 @@ export default {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        danger: {
+          DEFAULT: "hsl(var(--danger))",
+          foreground: "hsl(var(--danger-foreground))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -53,7 +91,9 @@ export default {
         chart: {
           yes: "hsl(var(--chart-yes))",
           no: "hsl(var(--chart-no))",
+          neutral: "hsl(var(--chart-neutral))",
           grid: "hsl(var(--chart-grid))",
+          axis: "hsl(var(--chart-axis))",
         },
         badge: {
           stage1: "hsl(var(--badge-stage-1))",
@@ -63,6 +103,11 @@ export default {
         provider: {
           facebook: "hsl(var(--provider-facebook))",
           linkedin: "hsl(var(--provider-linkedin))",
+        },
+        status: {
+          open: "hsl(var(--status-open))",
+          closed: "hsl(var(--status-closed))",
+          flagged: "hsl(var(--status-flagged))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

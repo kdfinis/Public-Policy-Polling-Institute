@@ -6,132 +6,228 @@
 All colors MUST be HSL.
 */
 
+/* ========================================
+   PHASE 2: PRODUCTION-READY DESIGN SYSTEM
+   Institutional Government-Grade Platform
+   ======================================== */
+
 @layer base {
   :root {
-    /* Institutional color system - muted, professional, trustworthy */
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
-
+    /* ============================================
+       THEME 1: CIVIC SLATE (Primary Theme)
+       Muted slate blue with sage green accents
+       WCAG AA+ compliant, institutional authority
+       ============================================ */
+    
+    /* Base Colors */
+    --background: 210 22% 97%;
+    --background-elevated: 0 0% 100%;
+    --foreground: 217 27% 18%;
+    
+    /* Card & Surface */
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
-
+    --card-foreground: 217 27% 18%;
+    --surface-subtle: 210 20% 94%;
+    
+    /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
-
-    /* Primary: muted blue-gray (governmental authority) */
-    --primary: 215 25% 35%;
-    --primary-foreground: 210 20% 98%;
-    --primary-hover: 215 25% 28%;
-
-    /* Secondary: warm neutral gray */
-    --secondary: 210 15% 92%;
-    --secondary-foreground: 215 25% 20%;
-    --secondary-hover: 210 15% 88%;
-
-    /* Accent: sage green (trust, neutrality) */
-    --accent: 150 20% 45%;
+    --popover-foreground: 217 27% 18%;
+    
+    /* Primary: Deep slate (governmental authority) */
+    --primary: 217 30% 32%;
+    --primary-foreground: 210 22% 98%;
+    --primary-hover: 217 30% 26%;
+    --primary-active: 217 30% 22%;
+    
+    /* Secondary: Warm neutral */
+    --secondary: 210 18% 90%;
+    --secondary-foreground: 217 25% 22%;
+    --secondary-hover: 210 18% 86%;
+    
+    /* Accent: Institutional sage green */
+    --accent: 152 26% 42%;
     --accent-foreground: 0 0% 100%;
-    --accent-hover: 150 20% 38%;
-
-    /* Muted backgrounds and text */
-    --muted: 210 15% 94%;
-    --muted-foreground: 215 15% 45%;
-
-    /* Destructive: muted red */
-    --destructive: 0 45% 48%;
+    --accent-hover: 152 26% 36%;
+    
+    /* Neutral shades */
+    --muted: 210 18% 92%;
+    --muted-foreground: 217 18% 48%;
+    
+    /* Status colors */
+    --success: 152 45% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 88% 52%;
+    --warning-foreground: 217 27% 18%;
+    --danger: 4 68% 52%;
+    --danger-foreground: 0 0% 100%;
+    --destructive: 4 68% 52%;
     --destructive-foreground: 0 0% 100%;
-
-    /* Chart colors (distinct but institutional) */
-    --chart-yes: 150 35% 50%;
-    --chart-no: 0 40% 55%;
-    --chart-grid: 210 15% 88%;
-
-    /* Borders and inputs */
-    --border: 215 20% 88%;
-    --input: 215 20% 88%;
-    --ring: 215 25% 35%;
-
+    --info: 207 75% 50%;
+    --info-foreground: 0 0% 100%;
+    
+    /* Chart colors (colorblind-safe) */
+    --chart-yes: 152 48% 48%;
+    --chart-no: 4 65% 55%;
+    --chart-neutral: 217 18% 65%;
+    --chart-grid: 210 18% 88%;
+    --chart-axis: 217 18% 70%;
+    
+    /* Borders & Inputs */
+    --border: 217 20% 86%;
+    --border-subtle: 210 18% 92%;
+    --input: 217 20% 86%;
+    --ring: 217 30% 32%;
+    --ring-offset: 0 0% 100%;
+    
+    /* Focus states */
+    --focus-ring: 217 30% 32%;
+    --focus-ring-offset: 0 0% 100%;
+    
     /* Verification badge colors */
-    --badge-stage-1: 45 70% 60%;
-    --badge-stage-2: 150 45% 50%;
-    --badge-stage-3: 215 50% 50%;
-
-    /* Social provider colors (muted) */
-    --provider-facebook: 214 60% 45%;
-    --provider-linkedin: 201 70% 42%;
-
+    --badge-stage-1: 42 88% 58%;
+    --badge-stage-2: 152 48% 48%;
+    --badge-stage-3: 217 75% 52%;
+    
+    /* Social provider colors (institutional muted) */
+    --provider-facebook: 221 60% 42%;
+    --provider-linkedin: 201 72% 38%;
+    
+    /* Status chips */
+    --status-open: 152 45% 45%;
+    --status-closed: 217 18% 55%;
+    --status-flagged: 38 88% 52%;
+    
+    /* Geometric properties */
     --radius: 0.375rem;
-
-    /* Transitions */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    
+    /* Transitions & Motion */
+    --transition-fast: 100ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-base: 150ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-
-    /* Shadows (subtle, institutional) */
-    --shadow-sm: 0 1px 2px 0 hsl(215 25% 15% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(215 25% 15% / 0.08);
-    --shadow-lg: 0 10px 15px -3px hsl(215 25% 15% / 0.1);
-
+    --transition-slower: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Easing curves */
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+    
+    /* Elevation shadows (subtle institutional) */
+    --shadow-xs: 0 1px 2px 0 hsl(217 27% 18% / 0.04);
+    --shadow-sm: 0 1px 3px 0 hsl(217 27% 18% / 0.06);
+    --shadow-md: 0 4px 6px -1px hsl(217 27% 18% / 0.08);
+    --shadow-lg: 0 10px 15px -3px hsl(217 27% 18% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(217 27% 18% / 0.12);
+    
+    /* Data visualization */
+    --viz-opacity-full: 1;
+    --viz-opacity-hover: 0.85;
+    --viz-opacity-inactive: 0.4;
+    
+    /* Sidebar tokens */
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-foreground: 217 25% 28%;
+    --sidebar-primary: 217 30% 32%;
+    --sidebar-primary-foreground: 210 22% 98%;
+    --sidebar-accent: 210 18% 94%;
+    --sidebar-accent-foreground: 217 27% 18%;
+    --sidebar-border: 217 20% 88%;
+    --sidebar-ring: 217 30% 32%;
+  }
+
+  /* ============================================
+     THEME 2: NORDIC FROST (Alternative Theme)
+     Cool blue-gray with teal accents
+     ============================================ */
+  [data-theme="nordic"] {
+    --background: 205 25% 96%;
+    --background-elevated: 0 0% 100%;
+    --foreground: 210 30% 20%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 210 30% 20%;
+    --surface-subtle: 205 22% 92%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 30% 20%;
+    
+    --primary: 210 38% 35%;
+    --primary-foreground: 205 25% 98%;
+    --primary-hover: 210 38% 29%;
+    --primary-active: 210 38% 24%;
+    
+    --secondary: 205 20% 88%;
+    --secondary-foreground: 210 28% 24%;
+    --secondary-hover: 205 20% 84%;
+    
+    --accent: 185 52% 42%;
+    --accent-foreground: 0 0% 100%;
+    --accent-hover: 185 52% 36%;
+    
+    --muted: 205 20% 90%;
+    --muted-foreground: 210 20% 50%;
+    
+    --chart-yes: 185 55% 45%;
+    --chart-no: 355 70% 55%;
+    --chart-neutral: 210 20% 65%;
+    --chart-grid: 205 20% 86%;
+    
+    --border: 210 22% 84%;
+    --input: 210 22% 84%;
+    --ring: 210 38% 35%;
   }
 
   .dark {
-    --background: 215 25% 12%;
-    --foreground: 210 20% 95%;
-
-    --card: 215 25% 14%;
-    --card-foreground: 210 20% 95%;
-
-    --popover: 215 25% 14%;
-    --popover-foreground: 210 20% 95%;
-
-    --primary: 215 20% 75%;
-    --primary-foreground: 215 25% 12%;
-    --primary-hover: 215 20% 68%;
-
-    --secondary: 215 20% 18%;
-    --secondary-foreground: 210 20% 90%;
-    --secondary-hover: 215 20% 22%;
-
-    --accent: 150 18% 55%;
-    --accent-foreground: 215 25% 12%;
-    --accent-hover: 150 18% 48%;
-
-    --muted: 215 20% 18%;
-    --muted-foreground: 215 15% 60%;
-
-    --destructive: 0 45% 55%;
-    --destructive-foreground: 210 20% 98%;
-
-    --chart-yes: 150 30% 55%;
-    --chart-no: 0 40% 60%;
-    --chart-grid: 215 20% 22%;
-
-    --border: 215 20% 22%;
-    --input: 215 20% 22%;
-    --ring: 215 20% 75%;
-
-    --badge-stage-1: 45 65% 65%;
-    --badge-stage-2: 150 40% 55%;
-    --badge-stage-3: 215 45% 60%;
-
-    --provider-facebook: 214 55% 55%;
-    --provider-linkedin: 201 65% 52%;
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* ============================================
+       DARK MODE: CIVIC SLATE DARK
+       High contrast for accessibility
+       ============================================ */
+    --background: 217 28% 11%;
+    --background-elevated: 217 26% 14%;
+    --foreground: 210 22% 94%;
+    
+    --card: 217 26% 14%;
+    --card-foreground: 210 22% 94%;
+    --surface-subtle: 217 25% 16%;
+    
+    --popover: 217 26% 14%;
+    --popover-foreground: 210 22% 94%;
+    
+    --primary: 210 22% 72%;
+    --primary-foreground: 217 28% 11%;
+    --primary-hover: 210 22% 78%;
+    --primary-active: 210 22% 84%;
+    
+    --secondary: 217 22% 20%;
+    --secondary-foreground: 210 22% 88%;
+    --secondary-hover: 217 22% 24%;
+    
+    --accent: 152 32% 52%;
+    --accent-foreground: 217 28% 11%;
+    --accent-hover: 152 32% 58%;
+    
+    --muted: 217 22% 18%;
+    --muted-foreground: 217 16% 62%;
+    
+    --chart-yes: 152 42% 52%;
+    --chart-no: 4 62% 58%;
+    --chart-neutral: 217 16% 68%;
+    --chart-grid: 217 20% 24%;
+    
+    --border: 217 22% 24%;
+    --input: 217 22% 24%;
+    --ring: 210 22% 72%;
+    
+    --sidebar-background: 217 28% 9%;
+    --sidebar-foreground: 210 22% 90%;
+    --sidebar-primary: 210 22% 72%;
+    --sidebar-primary-foreground: 217 28% 11%;
+    --sidebar-accent: 217 25% 16%;
+    --sidebar-accent-foreground: 210 22% 90%;
+    --sidebar-border: 217 22% 20%;
+    --sidebar-ring: 210 22% 72%;
   }
 }
 
@@ -141,6 +237,64 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+  
+  /* Focus-visible styling for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+  
+  /* Reduced motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  
+  /* Skip to main content link for accessibility */
+  .skip-to-main {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md;
+  }
+  
+  /* Screen reader only utility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  
+  /* Loading skeleton shimmer effect */
+  @keyframes shimmer {
+    0% {
+      background-position: -468px 0;
+    }
+    100% {
+      background-position: 468px 0;
+    }
+  }
+  
+  .skeleton-shimmer {
+    animation: shimmer 1.5s ease-in-out infinite;
+    background: linear-gradient(
+      to right,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted) / 0.7) 20%,
+      hsl(var(--muted)) 40%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 936px 100%;
   }
 }
+

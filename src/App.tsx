@@ -9,6 +9,10 @@ import PollDetail from "./pages/PollDetail";
 import Search from "./pages/Search";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
+import Analytics from "./pages/Analytics";
+import Terms from "./pages/Terms";
+import Error404 from "./pages/Error404";
+import Maintenance from "./pages/Maintenance";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +30,10 @@ const App = () => (
           <Route path="/search" element={<Search />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/404" element={<Error404 />} />
+          <Route path="/maintenance" element={<Maintenance />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
