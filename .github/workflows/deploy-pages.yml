@@ -34,7 +34,9 @@ jobs:
 
       - name: Build
         run: npm run build
-        # GITHUB_REPOSITORY is automatically available in GitHub Actions
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          # This ensures base path is set correctly
 
       - name: SPA fallback for GitHub Pages
         run: cp dist/index.html dist/404.html
