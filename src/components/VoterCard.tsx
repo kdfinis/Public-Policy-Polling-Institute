@@ -17,7 +17,7 @@ export function VoterCard({ user }: VoterCardProps) {
     .join('');
 
   return (
-    <Card className="w-56 shrink-0 shadow-sm hover:shadow-md transition-shadow">
+    <Card className="w-full shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-5 flex flex-col gap-4">
         <div className="flex flex-col items-center">
           <Avatar className="w-20 h-20 border border-border/50 shadow-sm">

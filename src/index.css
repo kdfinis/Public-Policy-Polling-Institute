@@ -39,21 +39,10 @@ All colors MUST be HSL.
     --primary-hover: 217 30% 26%;
     --primary-active: 217 30% 22%;
     
-    /* Secondary: Navy blue */
-    --secondary: 220 50% 25%;
-    --secondary-foreground: 210 22% 98%;
-    --secondary-hover: 220 50% 30%;
-    --secondary-active: 220 50% 20%;
-    
-    /* Navbar: Navy background */
-    --navbar: 220 50% 25%;
-    --navbar-foreground: 210 22% 98%;
-    
-    /* Category accent: Complementary warm amber to navy */
-    --category-accent: 40 85% 55%;
-    --category-accent-foreground: 220 50% 15%;
-    --category-accent-light: 40 85% 95%;
-    --category-accent-border: 40 85% 70%;
+    /* Secondary: Warm neutral */
+    --secondary: 210 18% 90%;
+    --secondary-foreground: 217 25% 22%;
+    --secondary-hover: 210 18% 86%;
     
     /* Accent: Institutional sage green */
     --accent: 152 26% 42%;
@@ -146,6 +135,22 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 217 27% 18%;
     --sidebar-border: 217 20% 88%;
     --sidebar-ring: 217 30% 32%;
+    
+    /* Navbar: Dark Navy primary */
+    --navbar: 220 55% 18%;
+    --navbar-foreground: 210 22% 98%;
+    
+    /* Category accent: Pastel cool slate blue (official, non-orange) */
+    --category-accent: 222 35% 62%;
+    --category-accent-foreground: 220 30% 15%;
+    --category-accent-light: 222 45% 96%;
+    --category-accent-border: 222 30% 70%;
+
+    /* Support accent: Pastel teal (global, official tone) */
+    --support-accent: 186 45% 42%;
+    --support-accent-foreground: 210 22% 98%;
+    --support-accent-light: 186 45% 94%;
+    --support-accent-border: 186 40% 68%;
   }
 
   /* ============================================

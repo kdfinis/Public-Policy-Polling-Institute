@@ -5,6 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // Use the repository name as base so assets resolve on GitHub Pages
+  base: "/truth-gauge-ui/",
   server: {
     host: "localhost",
     // 8080 is occupied by the API; run frontend on 5173 and proxy API

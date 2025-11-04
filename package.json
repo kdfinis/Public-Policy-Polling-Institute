@@ -9,6 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "serve:hosting": "firebase emulators:start --only hosting",
+    "deploy": "firebase deploy --only hosting",
     "admin": "node scripts/admin.js",
     "demo": "node scripts/seed-demo.js",
     "seed:polls20": "node scripts/seed-20polls.js",
