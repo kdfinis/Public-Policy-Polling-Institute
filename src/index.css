@@ -66,7 +66,7 @@ All colors MUST be HSL.
     --info-foreground: 0 0% 100%;
     
     /* Chart colors (colorblind-safe) */
-    --chart-yes: 152 48% 48%;
+    --chart-yes: 210 70% 50%;
     --chart-no: 4 65% 55%;
     --chart-neutral: 217 18% 65%;
     --chart-grid: 210 18% 88%;
@@ -169,7 +169,7 @@ All colors MUST be HSL.
     --muted: 205 20% 90%;
     --muted-foreground: 210 20% 50%;
     
-    --chart-yes: 185 55% 45%;
+    --chart-yes: 210 65% 50%;
     --chart-no: 355 70% 55%;
     --chart-neutral: 210 20% 65%;
     --chart-grid: 205 20% 86%;
@@ -211,7 +211,7 @@ All colors MUST be HSL.
     --muted: 217 22% 18%;
     --muted-foreground: 217 16% 62%;
     
-    --chart-yes: 152 42% 52%;
+    --chart-yes: 210 60% 60%;
     --chart-no: 4 62% 58%;
     --chart-neutral: 217 16% 68%;
     --chart-grid: 217 20% 24%;

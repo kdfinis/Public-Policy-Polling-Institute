@@ -14,6 +14,9 @@ import Terms from "./pages/Terms";
 import Error404 from "./pages/Error404";
 import Maintenance from "./pages/Maintenance";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import { DevConsoleOverlay } from "@/components/DevConsoleOverlay";
+import Voters from "./pages/Voters";
 
 const queryClient = new QueryClient();
 
@@ -31,13 +34,16 @@ const App = () => (
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/voters" element={<Voters />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/404" element={<Error404 />} />
           <Route path="/maintenance" element={<Maintenance />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      {import.meta.env.DEV && <DevConsoleOverlay />}
     </TooltipProvider>
   </QueryClientProvider>
 );

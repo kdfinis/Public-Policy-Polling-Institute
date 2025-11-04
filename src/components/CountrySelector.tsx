@@ -37,6 +37,21 @@ export function CountrySelector({
   const selectedState = usStates.find((s) => s.code === stateValue);
   const showStateSelector = value === 'US';
 
+  // Build list: special top-level options then all European countries
+  const specialOptions = [
+    { code: 'US', name: 'United States', flag: '🇺🇸' },
+    { code: 'EU', name: 'European Union', flag: '🇪🇺' },
+  ];
+
+  // Derive flag emoji from ISO country code
+  const codeToFlag = (code: string): string => {
+    if (!code || code.length < 2) return '';
+    const cc = code.slice(0, 2).toUpperCase();
+    const A = 0x1f1e6;
+    const a = 'A'.charCodeAt(0);
+    return String.fromCodePoint(A + (cc.charCodeAt(0) - a)) + String.fromCodePoint(A + (cc.charCodeAt(1) - a));
+  };
+
   return (
     <div className="flex items-center gap-2">
       <Popover open={open} onOpenChange={setOpen}>
@@ -49,7 +64,11 @@ export function CountrySelector({
           >
             <MapPin className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="truncate">
-              {selectedCountry ? selectedCountry.name : 'Select country'}
+              {value === 'EU'
+                ? 'European Union'
+                : selectedCountry
+                ? selectedCountry.name
+                : 'Country'}
             </span>
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
           </Button>
@@ -59,11 +78,12 @@ export function CountrySelector({
             <CommandInput placeholder="Search country..." />
             <CommandList>
               <CommandEmpty>No country found.</CommandEmpty>
-              <CommandGroup>
-                {countries.map((country) => (
+              {/* Top-level special options */}
+              <CommandGroup heading="Popular">
+                {specialOptions.map((opt) => (
                   <CommandItem
-                    key={country.code}
-                    value={country.code}
+                    key={opt.code}
+                    value={opt.code}
                     onSelect={(currentValue) => {
                       onChange(currentValue === value ? '' : currentValue);
                       if (currentValue !== 'US') {
@@ -76,12 +96,42 @@ export function CountrySelector({
                     <Check
                       className={cn(
                         'mr-2 h-4 w-4',
-                        value === country.code ? 'opacity-100' : 'opacity-0'
+                        value === opt.code ? 'opacity-100' : 'opacity-0'
                       )}
                     />
-                    {country.name}
+                    <span className="mr-2">{opt.flag}</span>
+                    {opt.name}
                   </CommandItem>
                 ))}
+              </CommandGroup>
+
+              {/* European countries */}
+              <CommandGroup heading="Europe">
+                {countries
+                  .filter((c) => c.code !== 'US')
+                  .map((country) => (
+                    <CommandItem
+                      key={country.code}
+                      value={country.code}
+                      onSelect={(currentValue) => {
+                        onChange(currentValue === value ? '' : currentValue);
+                        if (currentValue !== 'US') {
+                          onStateChange('');
+                        }
+                        setOpen(false);
+                      }}
+                      className="h-11"
+                    >
+                      <Check
+                        className={cn(
+                          'mr-2 h-4 w-4',
+                          value === country.code ? 'opacity-100' : 'opacity-0'
+                        )}
+                      />
+                      <span className="mr-2">{codeToFlag(country.code)}</span>
+                      {country.name}
+                    </CommandItem>
+                  ))}
               </CommandGroup>
             </CommandList>
           </Command>

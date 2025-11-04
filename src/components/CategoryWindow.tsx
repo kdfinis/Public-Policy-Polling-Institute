@@ -1,14 +1,16 @@
 import { ChevronRight } from 'lucide-react';
 import { PollCard, Poll } from './PollCard';
 import { Link } from 'react-router-dom';
+import { useTranslation } from '@/lib/i18n';
 
 interface CategoryWindowProps {
   category: string;
   polls: Poll[];
-  language?: 'en' | 'hr';
+  language?: 'en' | 'hr' | 'fr' | 'de';
 }
 
 export function CategoryWindow({ category, polls, language = 'en' }: CategoryWindowProps) {
+  const { t } = useTranslation(language);
   const featuredPolls = polls.slice(0, 2);
   const listPolls = polls.slice(2, 5);
 
@@ -20,7 +22,7 @@ export function CategoryWindow({ category, polls, language = 'en' }: CategoryWin
           to={`/browse?category=${encodeURIComponent(category)}`}
           className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary-hover transition-colors"
         >
-          {language === 'en' ? 'View all' : 'Vidi sve'}
+          {t('nav.browse')}
           <ChevronRight className="h-4 w-4" />
         </Link>
       </div>

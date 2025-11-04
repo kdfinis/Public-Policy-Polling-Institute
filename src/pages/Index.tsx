@@ -1,79 +1,68 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from '@/lib/i18n';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { CategoryWindow } from '@/components/CategoryWindow';
 import { Poll } from '@/components/PollCard';
+import { fetchPollsByCategory } from '@/lib/polls';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TopVotersCarousel } from '@/components/TopVotersCarousel';
+import { TopPoliticiansCarousel } from '@/components/TopPoliticiansCarousel';
 
-// Mock data generator
-function generateMockPolls(category: string, count: number): Poll[] {
-  const titles: Record<string, string[]> = {
-    'Domestic Policy': [
-      'Should the government increase funding for public infrastructure?',
-      'Do you support expanding affordable housing programs?',
-      'Should local governments have more autonomy in policy-making?',
-      'Do you support increased funding for public transportation?',
-      'Should term limits be imposed on elected officials?',
-    ],
-    'Foreign Policy': [
-      'Should the country increase its foreign aid budget?',
-      'Do you support strengthening international trade agreements?',
-      'Should military presence abroad be reduced?',
-      'Do you support diplomatic engagement with rival nations?',
-      'Should the country join new international coalitions?',
-    ],
-    'Economic Policy': [
-      'Should corporate tax rates be increased?',
-      'Do you support a universal basic income program?',
-      'Should minimum wage be adjusted for inflation annually?',
-      'Do you support stricter regulations on financial institutions?',
-      'Should small businesses receive more tax incentives?',
-    ],
-    'Environment': [
-      'Should the country commit to net-zero emissions by 2040?',
-      'Do you support banning single-use plastics nationwide?',
-      'Should renewable energy subsidies be increased?',
-      'Do you support stricter regulations on industrial emissions?',
-      'Should public lands be protected from development?',
-    ],
-  };
-
-  return Array.from({ length: count }, (_, i) => ({
-    id: `${category.toLowerCase().replace(/\s+/g, '-')}-${i + 1}`,
-    title: titles[category]?.[i % titles[category].length] || `${category} Poll ${i + 1}`,
+// Helper: map Firestore poll doc -> UI Poll shape
+function mapDocToPoll(category: string, d: any): Poll {
+  return {
+    id: d.id,
+    title: d.title ?? 'Untitled',
     category,
-    country: 'United States',
-    region: i % 3 === 0 ? 'California' : undefined,
-    yesPercent: Math.floor(Math.random() * 40) + 30,
-    noPercent: Math.floor(Math.random() * 40) + 30,
-    totalVotes: Math.floor(Math.random() * 10000) + 1000,
-    status: i % 5 === 0 ? 'closed' : 'open',
-  }));
+    country: d.country ?? 'US',
+    region: d.state ?? undefined,
+    yesPercent: Math.round(d.stats?.yesPercent ?? 50),
+    noPercent: Math.round(d.stats?.noPercent ?? 50),
+    totalVotes: Math.round(d.stats?.totalVotes ?? 0),
+    status: (d.status ?? 'open') as 'open' | 'closed',
+  };
 }
 
 export default function Index() {
-  const [selectedCountry, setSelectedCountry] = useState('US');
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedState, setSelectedState] = useState('FEDERAL');
-  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hr'>('en');
+  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hr' | 'fr' | 'de'>('en');
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation(selectedLanguage);
 
   const categories = [
-    'Domestic Policy',
-    'Foreign Policy',
-    'Economic Policy',
-    'Environment',
+    t('category.domestic'),
+    t('category.foreign'),
+    t('category.economic'),
+    t('category.environment'),
   ];
 
-  const categoryPolls = categories.reduce((acc, cat) => {
-    acc[cat] = generateMockPolls(cat, 5);
-    return acc;
-  }, {} as Record<string, Poll[]>);
+  const [categoryPolls, setCategoryPolls] = useState<Record<string, Poll[]>>({});
 
   useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, [selectedCountry, selectedState]);
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      const next: Record<string, Poll[]> = {};
+      for (const cat of categories) {
+        const docs = await fetchPollsByCategory(cat, {
+          country: selectedCountry || undefined,
+          state: selectedState || undefined,
+          max: 5,
+        });
+        next[cat] = docs.map((d) => mapDocToPoll(cat, d));
+      }
+      if (!cancelled) {
+        setCategoryPolls(next);
+        setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCountry, selectedState, selectedLanguage]);
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-4">
@@ -106,10 +95,14 @@ export default function Index() {
               <CategoryWindow
                 key={category}
                 category={category}
-                polls={categoryPolls[category]}
+                polls={categoryPolls[category] || []}
                 language={selectedLanguage}
               />
             ))}
+            <div className="mt-10 space-y-8">
+              <TopVotersCarousel />
+              <TopPoliticiansCarousel />
+            </div>
           </div>
         )}
       </main>

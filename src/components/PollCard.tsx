@@ -17,7 +17,7 @@ export interface Poll {
 interface PollCardProps {
   poll: Poll;
   variant?: 'featured' | 'compact';
-  language?: 'en' | 'hr';
+  language?: 'en' | 'hr' | 'fr' | 'de';
 }
 
 export function PollCard({ poll, variant = 'compact', language = 'en' }: PollCardProps) {
@@ -59,14 +59,17 @@ export function PollCard({ poll, variant = 'compact', language = 'en' }: PollCar
               <span className="text-chart-no">{language === 'en' ? 'No' : 'Ne'} {poll.noPercent}%</span>
             </div>
             <div className="h-2 bg-muted rounded-full overflow-hidden flex">
-              <div
-                className="bg-chart-yes"
-                style={{ width: `${poll.yesPercent}%` }}
-              />
-              <div
-                className="bg-chart-no"
-                style={{ width: `${poll.noPercent}%` }}
-              />
+              {(() => {
+                const total = Math.max(1, poll.yesPercent + poll.noPercent);
+                const yesW = (poll.yesPercent / total) * 100;
+                const noW = 100 - yesW;
+                return (
+                  <>
+                    <div className="bg-chart-yes" style={{ width: `${yesW}%` }} />
+                    <div className="bg-chart-no" style={{ width: `${noW}%` }} />
+                  </>
+                );
+              })()}
             </div>
           </div>
           <div className="text-right">

@@ -8,12 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { VotePreview } from '@/components/VotePreview';
 
 export default function PollDetail() {
   const { id } = useParams();
-  const [selectedCountry, setSelectedCountry] = useState('US');
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedState, setSelectedState] = useState('FEDERAL');
-  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hr'>('en');
+  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hr' | 'fr' | 'de'>('en');
   const [vote, setVote] = useState<'yes' | 'no' | null>(null);
   const [isPublic, setIsPublic] = useState(true);
   const [hasVoted, setHasVoted] = useState(false);
@@ -34,22 +35,25 @@ export default function PollDetail() {
     minSampleSize: 1000,
   };
 
-  // Mock age distribution data
+  // Mock age distribution data (oldest at top → youngest at bottom)
   const ageData = [
-    { range: '18-24', yes: 150, no: 80 },
-    { range: '25-34', yes: 320, no: 180 },
-    { range: '35-44', yes: 450, no: 290 },
-    { range: '45-54', yes: 380, no: 310 },
-    { range: '55-64', yes: 290, no: 340 },
-    { range: '65+', yes: 210, no: 380 },
+    { range: '90+', yes: 40, no: 70 },
+    { range: '80-89', yes: 60, no: 100 },
+    { range: '70-79', yes: 120, no: 160 },
+    { range: '60-69', yes: 220, no: 260 },
+    { range: '50-59', yes: 300, no: 280 },
+    { range: '40-49', yes: 380, no: 310 },
+    { range: '30-39', yes: 420, no: 300 },
+    { range: '22-29', yes: 350, no: 220 },
+    { range: 'Under 21', yes: 180, no: 120 },
   ];
 
   const maxVotes = Math.max(...ageData.flatMap(d => [d.yes, d.no]));
 
-  const handleVote = () => {
-    if (vote) {
-      setHasVoted(true);
-    }
+  const handleVote = (choice: 'yes' | 'no', visibility: boolean) => {
+    setVote(choice);
+    setIsPublic(visibility);
+    setHasVoted(true);
   };
 
   const t = (key: string) => {
@@ -136,8 +140,17 @@ export default function PollDetail() {
                 <span className="text-chart-no">{t('voteNo')} {poll.noPercent}%</span>
               </div>
               <div className="h-3 bg-muted rounded-full overflow-hidden flex">
-                <div className="bg-chart-yes" style={{ width: `${poll.yesPercent}%` }} />
-                <div className="bg-chart-no" style={{ width: `${poll.noPercent}%` }} />
+                {(() => {
+                  const total = Math.max(1, poll.yesPercent + poll.noPercent);
+                  const yesW = (poll.yesPercent / total) * 100;
+                  const noW = 100 - yesW;
+                  return (
+                    <>
+                      <div className="bg-chart-yes" style={{ width: `${yesW}%` }} />
+                      <div className="bg-chart-no" style={{ width: `${noW}%` }} />
+                    </>
+                  );
+                })()}
               </div>
             </div>
             <div className="text-right">
@@ -148,45 +161,16 @@ export default function PollDetail() {
 
           {/* Vote Widget */}
           {!hasVoted && poll.status === 'open' && (
-            <div className="space-y-4">
-              <div className="flex gap-3">
-                <Button
-                  variant={vote === 'yes' ? 'default' : 'outline'}
-                  className="flex-1 h-12"
-                  onClick={() => setVote('yes')}
-                >
-                  {t('voteYes')}
-                </Button>
-                <Button
-                  variant={vote === 'no' ? 'default' : 'outline'}
-                  className="flex-1 h-12"
-                  onClick={() => setVote('no')}
-                >
-                  {t('voteNo')}
-                </Button>
-              </div>
-
-              {vote && (
-                <div className="space-y-3 animate-fade-in">
-                  <div className="flex items-center justify-between p-3 bg-muted rounded-md">
-                    <Label htmlFor="public-vote" className="cursor-pointer">
-                      {isPublic ? t('public') : t('private')}
-                    </Label>
-                    <Switch
-                      id="public-vote"
-                      checked={isPublic}
-                      onCheckedChange={setIsPublic}
-                    />
-                  </div>
-                  {isPublic && (
-                    <p className="text-xs text-muted-foreground">{t('consent')}</p>
-                  )}
-                  <Button onClick={handleVote} className="w-full h-12">
-                    {t('submitVote')}
-                  </Button>
-                </div>
-              )}
-            </div>
+            <VotePreview
+              voteYesLabel={t('voteYes')}
+              voteNoLabel={t('voteNo')}
+              publicLabel={t('public')}
+              privateLabel={t('private')}
+              consentText={t('consent')}
+              submitLabel={t('submitVote')}
+              onSubmit={handleVote}
+              className="space-y-4"
+            />
           )}
 
           {hasVoted && (
@@ -204,14 +188,14 @@ export default function PollDetail() {
         {/* Age Distribution Chart */}
         <div className="bg-card border border-border rounded-md p-6 mb-6">
           <h2 className="text-lg font-bold mb-4">{t('ageDistribution')}</h2>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {ageData.map((data) => (
               <div key={data.range} className="space-y-1">
                 <div className="text-sm font-medium text-muted-foreground">{data.range}</div>
                 <div className="flex gap-2">
                   <div className="flex-1 flex justify-end">
                     <div
-                      className="h-8 bg-chart-yes rounded-l flex items-center justify-end pr-2 text-xs font-medium text-white"
+                      className="h-4 bg-chart-yes rounded-l flex items-center justify-end pr-2 text-[10px] font-medium text-white"
                       style={{ width: `${(data.yes / maxVotes) * 100}%` }}
                     >
                       {data.yes > 50 && data.yes}
@@ -219,7 +203,7 @@ export default function PollDetail() {
                   </div>
                   <div className="flex-1">
                     <div
-                      className="h-8 bg-chart-no rounded-r flex items-center pl-2 text-xs font-medium text-white"
+                      className="h-4 bg-chart-no rounded-r flex items-center pl-2 text-[10px] font-medium text-white"
                       style={{ width: `${(data.no / maxVotes) * 100}%` }}
                     >
                       {data.no > 50 && data.no}

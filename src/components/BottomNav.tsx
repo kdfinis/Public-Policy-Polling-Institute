@@ -1,9 +1,9 @@
-import { Home, Search, Bell, User, Grid3x3 } from 'lucide-react';
+import { Home, Search, Bell, User, Grid3x3, Users } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 interface BottomNavProps {
-  language: 'en' | 'hr';
+  language: 'en' | 'hr' | 'fr' | 'de';
 }
 
 export function BottomNav({ language }: BottomNavProps) {
@@ -13,6 +13,7 @@ export function BottomNav({ language }: BottomNavProps) {
     { path: '/', icon: Home, label: language === 'en' ? 'Home' : 'Naslovnica' },
     { path: '/browse', icon: Grid3x3, label: language === 'en' ? 'Browse' : 'Pretraži' },
     { path: '/search', icon: Search, label: language === 'en' ? 'Search' : 'Traži' },
+    { path: '/voters', icon: Users, label: language === 'en' ? 'Voters' : 'Birači' },
     { path: '/notifications', icon: Bell, label: language === 'en' ? 'Notifications' : 'Obavijesti' },
     { path: '/profile', icon: User, label: language === 'en' ? 'Profile' : 'Profil' },
   ];
@@ -35,8 +36,15 @@ export function BottomNav({ language }: BottomNavProps) {
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              <Icon className="h-5 w-5" />
-              <span className="text-xs font-medium">{item.label}</span>
+              <span
+                className={cn(
+                  'px-3 py-1.5 rounded-full flex items-center gap-2',
+                  isActive ? 'bg-primary/10' : 'bg-transparent'
+                )}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="text-xs font-medium">{item.label}</span>
+              </span>
             </Link>
           );
         })}

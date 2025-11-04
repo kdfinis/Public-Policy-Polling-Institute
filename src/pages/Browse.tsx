@@ -1,46 +1,48 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Filter } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { PollCard, Poll } from '@/components/PollCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { fetchPollsByCategory } from '@/lib/polls';
 
-// Mock data (same as Index for now)
-function generateMockPolls(): Poll[] {
-  const categories = ['Domestic Policy', 'Foreign Policy', 'Economic Policy', 'Environment'];
-  const titles = [
-    'Should the government increase funding for public infrastructure?',
-    'Do you support expanding affordable housing programs?',
-    'Should corporate tax rates be increased?',
-    'Should the country commit to net-zero emissions by 2040?',
-    'Do you support strengthening international trade agreements?',
-    'Should minimum wage be adjusted for inflation annually?',
-    'Do you support banning single-use plastics nationwide?',
-    'Should local governments have more autonomy in policy-making?',
-  ];
-
-  return Array.from({ length: 20 }, (_, i) => ({
-    id: `poll-${i + 1}`,
-    title: titles[i % titles.length],
-    category: categories[i % categories.length],
-    country: 'United States',
-    region: i % 3 === 0 ? 'California' : undefined,
-    yesPercent: Math.floor(Math.random() * 40) + 30,
-    noPercent: Math.floor(Math.random() * 40) + 30,
-    totalVotes: Math.floor(Math.random() * 10000) + 1000,
-    status: i % 5 === 0 ? 'closed' : 'open',
-  }));
+function mapDocToPoll(d: any): Poll {
+  return {
+    id: d.id,
+    title: d.title ?? 'Untitled',
+    category: d.category ?? 'Domestic Policy',
+    country: d.country ?? 'US',
+    region: d.state ?? undefined,
+    yesPercent: Math.round(d.stats?.yesPercent ?? 50),
+    noPercent: Math.round(d.stats?.noPercent ?? 50),
+    totalVotes: Math.round(d.stats?.totalVotes ?? 0),
+    status: (d.status ?? 'open') as 'open' | 'closed',
+  };
 }
 
 export default function Browse() {
-  const [selectedCountry, setSelectedCountry] = useState('US');
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedState, setSelectedState] = useState('FEDERAL');
-  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hr'>('en');
+  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hr' | 'fr' | 'de'>('en');
   const [filterOpen, setFilterOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [polls, setPolls] = useState<Poll[]>([]);
 
-  const polls = generateMockPolls();
+  async function load() {
+    const cats = ['Domestic Policy', 'Foreign Policy', 'Economic Policy', 'Environment'];
+    const results: Poll[] = [];
+    for (const c of cats) {
+      const docs = await fetchPollsByCategory(c, { country: selectedCountry || undefined, state: selectedState || undefined, max: 20 });
+      results.push(...docs.map(mapDocToPoll));
+    }
+    setPolls(results);
+  }
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCountry, selectedState]);
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-4">

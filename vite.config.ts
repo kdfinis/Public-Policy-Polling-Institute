@@ -7,7 +7,22 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    // 8080 is occupied by the API; run frontend on 5173 and proxy API
+    port: 5173,
+    proxy: {
+      "/api": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+      },
+      "/health": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+      },
+      "/ready": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
