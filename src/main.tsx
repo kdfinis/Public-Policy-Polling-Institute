@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
@@ -6,7 +7,14 @@ import "@/lib/monitoring";
 
 // Basic global error banner to avoid blank screen without feedback
 function installGlobalErrorBanner() {
+  let currentBanner: HTMLElement | null = null;
+
   const show = (msg: string) => {
+    // Remove existing banner to prevent memory leak
+    if (currentBanner && currentBanner.parentNode) {
+      currentBanner.parentNode.removeChild(currentBanner);
+    }
+
     const el = document.createElement('div');
     el.style.position = 'fixed';
     el.style.top = '0';
@@ -19,31 +27,34 @@ function installGlobalErrorBanner() {
     el.style.fontFamily = 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
     el.textContent = `Runtime error: ${msg}`;
     document.body.appendChild(el);
+    currentBanner = el;
   };
-  window.addEventListener('error', (e) => show(e.message));
-  window.addEventListener('unhandledrejection', (e: PromiseRejectionEvent) => {
+
+  const errorHandler = (e: ErrorEvent) => show(e.message);
+  const rejectionHandler = (e: PromiseRejectionEvent) => {
     const reason = (e.reason && (e.reason.message || e.reason.toString())) || 'Unknown error';
     show(reason);
-  });
+  };
+
+  window.addEventListener('error', errorHandler);
+  window.addEventListener('unhandledrejection', rejectionHandler);
+
+  // Cleanup function (though this runs for app lifetime)
+  return () => {
+    window.removeEventListener('error', errorHandler);
+    window.removeEventListener('unhandledrejection', rejectionHandler);
+    if (currentBanner && currentBanner.parentNode) {
+      currentBanner.parentNode.removeChild(currentBanner);
+    }
+  };
 }
 
 installGlobalErrorBanner();
 
 const rootEl = document.getElementById("root")!;
 
-// TEMP: ensure something renders while debugging blank screen
-const pre = document.createElement('div');
-pre.textContent = 'Loading UI…';
-pre.style.position = 'fixed';
-pre.style.bottom = '8px';
-pre.style.right = '8px';
-pre.style.background = '#111827';
-pre.style.color = '#fff';
-pre.style.padding = '6px 10px';
-pre.style.borderRadius = '6px';
-document.body.appendChild(pre);
-
-createRoot(rootEl).render(
+const root = createRoot(rootEl);
+root.render(
   <ErrorBoundary>
     <App />
   </ErrorBoundary>

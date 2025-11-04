@@ -27,11 +27,19 @@ export default function Voters() {
     let mounted = true;
     setLoading(true);
     (async () => {
-      const first = await fetchDirectoryPage({ type, gender, pageSize: 24, cursor: null });
-      if (!mounted) return;
-      setPage(first);
-      setItems(first.items);
-      setLoading(false);
+      try {
+        const first = await fetchDirectoryPage({ type, gender, pageSize: 24, cursor: null });
+        if (!mounted) return;
+        setPage(first);
+        setItems(first.items);
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch directory page:', error);
+        if (!mounted) return;
+        setPage(null);
+        setItems([]);
+        setLoading(false);
+      }
     })();
     return () => {
       mounted = false;
@@ -41,10 +49,18 @@ export default function Voters() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const [tv, tp] = await Promise.all([fetchTopVoters(10), fetchTopPoliticians(10)]);
-      if (!mounted) return;
-      setTopVoters(tv);
-      setTopPoliticians(tp);
+      try {
+        const [tv, tp] = await Promise.all([fetchTopVoters(10), fetchTopPoliticians(10)]);
+        if (!mounted) return;
+        setTopVoters(tv);
+        setTopPoliticians(tp);
+      } catch (error) {
+        console.error('Failed to fetch top voters/politicians:', error);
+        if (!mounted) return;
+        // Set empty arrays on error to prevent page crash
+        setTopVoters([]);
+        setTopPoliticians([]);
+      }
     })();
     return () => {
       mounted = false;
@@ -54,10 +70,15 @@ export default function Voters() {
   const loadMore = async () => {
     if (!page?.nextCursor) return;
     setLoadingMore(true);
-    const next = await fetchDirectoryPage({ type, gender, pageSize: 24, cursor: page.nextCursor });
-    setItems((prev) => [...prev, ...next.items]);
-    setPage(next);
-    setLoadingMore(false);
+    try {
+      const next = await fetchDirectoryPage({ type, gender, pageSize: 24, cursor: page.nextCursor });
+      setItems((prev) => [...prev, ...next.items]);
+      setPage(next);
+    } catch (error) {
+      console.error('Failed to load more items:', error);
+    } finally {
+      setLoadingMore(false);
+    }
   };
 
   const filtered = items.filter((u) => {

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Shield, Facebook, Linkedin } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
@@ -6,10 +7,26 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
+// Mock voter data for public profiles
+const mockVoters: Record<string, { name: string; verified: boolean; social: string[]; country: string }> = {
+  'voter-001': { name: 'Alex Thompson', verified: true, social: ['FB', 'LI'], country: 'United States' },
+  'voter-002': { name: 'Jordan Martinez', verified: true, social: ['LI'], country: 'United States' },
+  'voter-003': { name: 'Casey Williams', verified: false, social: ['FB'], country: 'United States' },
+  'voter-004': { name: 'Riley Anderson', verified: true, social: ['FB', 'LI'], country: 'United States' },
+  'voter-005': { name: 'Taylor Brown', verified: true, social: ['LI'], country: 'United States' },
+  'voter-006': { name: 'Morgan Garcia', verified: false, social: ['FB'], country: 'United States' },
+  'voter-007': { name: 'Quinn Lee', verified: true, social: ['FB', 'LI'], country: 'United States' },
+  'voter-008': { name: 'Sam Wilson', verified: true, social: ['LI'], country: 'United States' },
+};
+
 export default function Profile() {
-  const [selectedCountry, setSelectedCountry] = useState('US');
+  const { userId } = useParams();
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedState, setSelectedState] = useState('FEDERAL');
-  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hr'>('en');
+  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hr' | 'fr' | 'de'>('en');
+  
+  const isViewingOtherProfile = !!userId;
+  const voterData = userId ? mockVoters[userId] : null;
 
   const t = (key: string) => {
     const translations: Record<string, Record<string, string>> = {
@@ -65,11 +82,20 @@ export default function Profile() {
         <div className="bg-card border border-border rounded-md p-6 mb-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-20 h-20 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold">
-              U
+              {isViewingOtherProfile && voterData ? voterData.name[0] : 'U'}
             </div>
             <div>
-              <h2 className="text-xl font-bold">Demo User</h2>
-              <p className="text-sm text-muted-foreground">United States</p>
+              <h2 className="text-xl font-bold">
+                {isViewingOtherProfile && voterData ? voterData.name : 'Demo User'}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {isViewingOtherProfile && voterData ? voterData.country : 'United States'}
+              </p>
+              {isViewingOtherProfile && voterData && voterData.verified && (
+                <Badge variant="outline" className="mt-2 bg-badge-stage-3/10 border-badge-stage-3">
+                  ID Verified
+                </Badge>
+              )}
             </div>
           </div>
         </div>
@@ -113,34 +139,65 @@ export default function Profile() {
         </div>
 
         {/* Linked Accounts */}
-        <div className="bg-card border border-border rounded-md p-6 mb-6">
-          <h3 className="text-lg font-bold mb-4">{t('linkedAccounts')}</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 border border-border rounded-md">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded bg-provider-facebook flex items-center justify-center">
-                  <Facebook className="h-5 w-5 text-white" />
-                </div>
-                <span className="font-medium">Facebook</span>
-              </div>
-              <Button variant="outline" size="sm">
-                {t('disconnect')}
-              </Button>
-            </div>
+        {(!isViewingOtherProfile || (isViewingOtherProfile && voterData?.social && voterData.social.length > 0)) && (
+          <div className="bg-card border border-border rounded-md p-6 mb-6">
+            <h3 className="text-lg font-bold mb-4">{t('linkedAccounts')}</h3>
+            <div className="space-y-3">
+              {isViewingOtherProfile && voterData ? (
+                <>
+                  {voterData.social.includes('FB') && (
+                    <div className="flex items-center justify-between p-3 border border-border rounded-md">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded bg-provider-facebook flex items-center justify-center">
+                          <Facebook className="h-5 w-5 text-white" />
+                        </div>
+                        <span className="font-medium">Facebook</span>
+                      </div>
+                      <Badge variant="outline">Connected</Badge>
+                    </div>
+                  )}
+                  {voterData.social.includes('LI') && (
+                    <div className="flex items-center justify-between p-3 border border-border rounded-md">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded bg-provider-linkedin flex items-center justify-center">
+                          <Linkedin className="h-5 w-5 text-white" />
+                        </div>
+                        <span className="font-medium">LinkedIn</span>
+                      </div>
+                      <Badge variant="outline">Connected</Badge>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between p-3 border border-border rounded-md">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded bg-provider-facebook flex items-center justify-center">
+                        <Facebook className="h-5 w-5 text-white" />
+                      </div>
+                      <span className="font-medium">Facebook</span>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      {t('disconnect')}
+                    </Button>
+                  </div>
 
-            <div className="flex items-center justify-between p-3 border border-border rounded-md">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded bg-provider-linkedin flex items-center justify-center">
-                  <Linkedin className="h-5 w-5 text-white" />
-                </div>
-                <span className="font-medium">LinkedIn</span>
-              </div>
-              <Button variant="outline" size="sm">
-                {t('disconnect')}
-              </Button>
+                  <div className="flex items-center justify-between p-3 border border-border rounded-md">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded bg-provider-linkedin flex items-center justify-center">
+                        <Linkedin className="h-5 w-5 text-white" />
+                      </div>
+                      <span className="font-medium">LinkedIn</span>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      {t('disconnect')}
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
-        </div>
+        )}
       </main>
 
       <BottomNav language={selectedLanguage} />

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
@@ -9,31 +9,66 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { VotePreview } from '@/components/VotePreview';
+import { fetchPollById } from '@/lib/polls';
+import { castVote, getUserVote } from '@/lib/votes';
+import { auth } from '@/lib/firebase';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PollDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedState, setSelectedState] = useState('FEDERAL');
   const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'hr' | 'fr' | 'de'>('en');
   const [vote, setVote] = useState<'yes' | 'no' | null>(null);
   const [isPublic, setIsPublic] = useState(true);
   const [hasVoted, setHasVoted] = useState(false);
+  const [poll, setPoll] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Mock poll data
-  const poll = {
-    id,
-    title: 'Should the government increase funding for public infrastructure?',
-    description: 'This poll aims to gauge public support for increased federal investment in roads, bridges, public transit, and other critical infrastructure.',
-    category: 'Domestic Policy',
-    country: 'United States',
-    region: 'Federal (All States)',
-    citizenship: 'US Citizens',
-    yesPercent: 62,
-    noPercent: 38,
-    totalVotes: 8547,
-    status: 'open' as const,
-    minSampleSize: 1000,
-  };
+  // Validate route parameter and fetch poll
+  useEffect(() => {
+    if (!id || id.trim() === '') {
+      navigate('/404', { replace: true });
+      return;
+    }
+
+    async function load() {
+      setLoading(true);
+      try {
+        const pollData = await fetchPollById(id);
+        if (!pollData) {
+          navigate('/404', { replace: true });
+          return;
+        }
+        setPoll(pollData);
+
+        // Check if user already voted
+        if (auth.currentUser) {
+          const existingVote = await getUserVote(id);
+          if (existingVote) {
+            setVote(existingVote.optionId as 'yes' | 'no');
+            setIsPublic(existingVote.visibility === 'public');
+            setHasVoted(true);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load poll:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load poll. Please try again.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    load();
+  }, [id, navigate, toast]);
 
   // Mock age distribution data (oldest at top → youngest at bottom)
   const ageData = [
@@ -50,10 +85,42 @@ export default function PollDetail() {
 
   const maxVotes = Math.max(...ageData.flatMap(d => [d.yes, d.no]));
 
-  const handleVote = (choice: 'yes' | 'no', visibility: boolean) => {
-    setVote(choice);
-    setIsPublic(visibility);
-    setHasVoted(true);
+  const handleVote = async (choice: 'yes' | 'no', visibility: boolean) => {
+    if (!id || !poll) return;
+    if (!auth.currentUser) {
+      toast({
+        title: 'Sign in required',
+        description: 'Please sign in to vote.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await castVote(id, choice, visibility ? 'public' : 'private', selectedCountry || 'US', selectedState || undefined);
+      setVote(choice);
+      setIsPublic(visibility);
+      setHasVoted(true);
+      
+      // Refresh poll stats
+      const updatedPoll = await fetchPollById(id);
+      if (updatedPoll) setPoll(updatedPoll);
+
+      toast({
+        title: 'Vote submitted',
+        description: 'Your vote has been recorded.',
+      });
+    } catch (error: any) {
+      console.error('Failed to cast vote:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to submit vote. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const t = (key: string) => {
@@ -91,8 +158,34 @@ export default function PollDetail() {
         verified: 'ID Provjeren',
       },
     };
-    return translations[selectedLanguage][key] || key;
+    // Safe access with fallback
+    const langTranslations = translations[selectedLanguage];
+    if (!langTranslations) {
+      return translations.en?.[key] || key;
+    }
+    return langTranslations[key] || key;
   };
+
+  if (loading || !poll) {
+    return (
+      <div className="min-h-screen bg-background pb-20 md:pb-4">
+        <Header
+          selectedCountry={selectedCountry}
+          selectedState={selectedState}
+          selectedLanguage={selectedLanguage}
+          onCountryChange={setSelectedCountry}
+          onStateChange={setSelectedState}
+          onLanguageChange={setSelectedLanguage}
+        />
+        <main className="container mx-auto px-4 py-6 max-w-3xl">
+          <Skeleton className="h-8 w-32 mb-4" />
+          <Skeleton className="h-64 w-full" />
+        </main>
+      </div>
+    );
+  }
+
+  const stats = poll.stats || { totalVotes: 0, yesPercent: 0, noPercent: 0 };
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-4">
@@ -119,8 +212,7 @@ export default function PollDetail() {
           <div className="flex flex-wrap items-center gap-2 mb-4">
             <Badge variant="secondary">{poll.category}</Badge>
             <Badge variant="secondary">{poll.country}</Badge>
-            <Badge variant="secondary">{poll.region}</Badge>
-            <Badge variant="secondary">{poll.citizenship}</Badge>
+            {poll.state && <Badge variant="secondary">{poll.state}</Badge>}
             <Badge
               variant={poll.status === 'open' ? 'default' : 'secondary'}
               className={poll.status === 'open' ? 'bg-accent text-accent-foreground' : ''}
@@ -130,19 +222,19 @@ export default function PollDetail() {
           </div>
 
           <h1 className="text-2xl font-bold mb-3">{poll.title}</h1>
-          <p className="text-muted-foreground mb-4">{poll.description}</p>
+          {poll.description && <p className="text-muted-foreground mb-4">{poll.description}</p>}
 
           {/* Current Results */}
           <div className="flex items-center gap-4 mb-6">
             <div className="flex-1">
               <div className="flex justify-between text-sm font-medium mb-2">
-                <span className="text-chart-yes">{t('voteYes')} {poll.yesPercent}%</span>
-                <span className="text-chart-no">{t('voteNo')} {poll.noPercent}%</span>
+                <span className="text-chart-yes">{t('voteYes')} {stats.yesPercent || 0}%</span>
+                <span className="text-chart-no">{t('voteNo')} {stats.noPercent || 0}%</span>
               </div>
               <div className="h-3 bg-muted rounded-full overflow-hidden flex">
                 {(() => {
-                  const total = Math.max(1, poll.yesPercent + poll.noPercent);
-                  const yesW = (poll.yesPercent / total) * 100;
+                  const total = Math.max(1, (stats.yesPercent || 0) + (stats.noPercent || 0));
+                  const yesW = ((stats.yesPercent || 0) / total) * 100;
                   const noW = 100 - yesW;
                   return (
                     <>
@@ -154,7 +246,7 @@ export default function PollDetail() {
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold">{poll.totalVotes.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{(stats.totalVotes || 0).toLocaleString()}</div>
               <div className="text-sm text-muted-foreground">{t('votes')}</div>
             </div>
           </div>
@@ -170,6 +262,7 @@ export default function PollDetail() {
               submitLabel={t('submitVote')}
               onSubmit={handleVote}
               className="space-y-4"
+              disabled={submitting}
             />
           )}
 
@@ -220,17 +313,26 @@ export default function PollDetail() {
           <h2 className="text-lg font-bold mb-4">{t('publicVoters')}</h2>
           <div className="space-y-3">
             {[
-              { name: 'Sarah Johnson', vote: 'yes', verified: true, social: ['FB', 'LI'] },
-              { name: 'Michael Chen', vote: 'no', verified: true, social: ['LI'] },
-              { name: 'Emma Davis', vote: 'yes', verified: false, social: ['FB'] },
-            ].map((voter, i) => (
-              <div key={i} className="flex items-center gap-3 pb-3 border-b border-border last:border-0">
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-medium">
+              { userId: 'voter-001', name: 'Alex Thompson', vote: 'yes', verified: true, social: ['FB', 'LI'] },
+              { userId: 'voter-002', name: 'Jordan Martinez', vote: 'no', verified: true, social: ['LI'] },
+              { userId: 'voter-003', name: 'Casey Williams', vote: 'yes', verified: false, social: ['FB'] },
+              { userId: 'voter-004', name: 'Riley Anderson', vote: 'yes', verified: true, social: ['FB', 'LI'] },
+              { userId: 'voter-005', name: 'Taylor Brown', vote: 'no', verified: true, social: ['LI'] },
+              { userId: 'voter-006', name: 'Morgan Garcia', vote: 'yes', verified: false, social: ['FB'] },
+              { userId: 'voter-007', name: 'Quinn Lee', vote: 'no', verified: true, social: ['FB', 'LI'] },
+              { userId: 'voter-008', name: 'Sam Wilson', vote: 'yes', verified: true, social: ['LI'] },
+            ].map((voter) => (
+              <Link
+                key={voter.userId}
+                to={`/profile/${voter.userId}`}
+                className="flex items-center gap-3 pb-3 border-b border-border last:border-0 hover:bg-muted/50 transition-colors rounded-md px-2 -mx-2"
+              >
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-medium shrink-0">
                   {voter.name[0]}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="font-medium">{voter.name}</div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     {voter.social.map((s) => (
                       <Badge
                         key={s}
@@ -249,11 +351,11 @@ export default function PollDetail() {
                 </div>
                 <Badge
                   variant={voter.vote === 'yes' ? 'default' : 'secondary'}
-                  className={voter.vote === 'yes' ? 'bg-chart-yes' : 'bg-chart-no'}
+                  className={voter.vote === 'yes' ? 'bg-chart-yes' : 'bg-chart-no shrink-0'}
                 >
                   {voter.vote === 'yes' ? t('voteYes') : t('voteNo')}
                 </Badge>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

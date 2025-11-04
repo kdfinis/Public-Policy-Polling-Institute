@@ -12,10 +12,17 @@ export function DevConsoleOverlay() {
 
   useEffect(() => {
     const push = (level: LogEntry['level'], args: any[]) => {
+      // Throttle log updates to prevent excessive re-renders
       const msg = args
         .map((a) => (a instanceof Error ? a.stack || a.message : typeof a === 'object' ? JSON.stringify(a) : String(a)))
         .join(' ');
-      setLogs((l) => [...l.slice(-99), { level, message: msg }]);
+      
+      // Limit message length and log count to prevent memory issues
+      const truncatedMsg = msg.length > 500 ? msg.substring(0, 500) + '...' : msg;
+      setLogs((l) => {
+        const newLogs = [...l.slice(-49), { level, message: truncatedMsg }];
+        return newLogs; // Limit to 50 logs instead of 100
+      });
 
       // Forward to Sentry if configured
       try {

@@ -14,6 +14,7 @@ export interface VotePreviewProps {
   submitLabel: string;
   onSubmit: (vote: VoteChoice, isPublic: boolean) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 export function VotePreview({
@@ -25,6 +26,7 @@ export function VotePreview({
   submitLabel,
   onSubmit,
   className,
+  disabled = false,
 }: VotePreviewProps) {
   const [selectedVote, setSelectedVote] = useState<VoteChoice | null>(null);
   const [isPublic, setIsPublic] = useState(true);
@@ -66,6 +68,7 @@ export function VotePreview({
           <Button
             className="w-full h-12"
             onClick={() => selectedVote && onSubmit(selectedVote, isPublic)}
+            disabled={disabled}
           >
             {submitLabel}
           </Button>

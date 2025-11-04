@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import type { PublicUser } from '@/lib/users';
 
 interface VoterCardProps {
@@ -16,20 +17,36 @@ export function VoterCard({ user }: VoterCardProps) {
     .join('');
 
   return (
-    <Card className="w-48 shrink-0">
-      <CardContent className="p-4 flex flex-col items-center gap-3">
-        <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center text-sm font-semibold text-muted-foreground">
-          {initials || 'U'}
+    <Card className="w-56 shrink-0 shadow-sm hover:shadow-md transition-shadow">
+      <CardContent className="p-5 flex flex-col gap-4">
+        <div className="flex flex-col items-center">
+          <Avatar className="w-20 h-20 border border-border/50 shadow-sm">
+            <AvatarImage 
+              src={(user as any).profile_photo_url} 
+              alt={displayName}
+              className="object-cover"
+            />
+            <AvatarFallback className="text-lg font-normal bg-muted text-muted-foreground">
+              {initials || 'U'}
+            </AvatarFallback>
+          </Avatar>
         </div>
-        <div className="text-center">
-          <div className="font-medium leading-tight">{displayName}</div>
+        <div className="text-center space-y-2">
+          <div className="font-medium text-base leading-snug text-foreground">
+            {displayName}
+          </div>
           {user.is_politician && (
-            <div className="mt-1">
-              <Badge variant="secondary">{user.politician_role || 'Politician'}</Badge>
+            <div>
+              <Badge 
+                variant="secondary" 
+                className="text-xs font-normal px-2.5 py-0.5 bg-muted/80"
+              >
+                {user.politician_role || 'Politician'}
+              </Badge>
             </div>
           )}
         </div>
-        <div className="text-xs text-muted-foreground">
+        <div className="text-xs text-muted-foreground text-center pt-2 border-t border-border/50">
           {user.public_vote_count_30d ?? 0} votes last 30d
         </div>
       </CardContent>

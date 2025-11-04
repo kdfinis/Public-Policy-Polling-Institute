@@ -60,9 +60,9 @@ export function CountrySelector({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="min-w-[140px] justify-between h-11 bg-background"
+            className="min-w-[140px] justify-between h-11 bg-white/10 border-white/20 text-[hsl(var(--navbar-foreground))] hover:bg-white/20 hover:border-white/30"
           >
-            <MapPin className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+            <MapPin className="mr-2 h-4 w-4 shrink-0 text-[hsl(var(--navbar-foreground))]/70" />
             <span className="truncate">
               {value === 'EU'
                 ? 'European Union'
@@ -70,66 +70,73 @@ export function CountrySelector({
                 ? selectedCountry.name
                 : 'Country'}
             </span>
-            <ChevronDown className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
+            <ChevronDown className="ml-2 h-4 w-4 shrink-0 text-[hsl(var(--navbar-foreground))]/70" />
           </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-0" align="start">
-          <Command>
-            <CommandInput placeholder="Search country..." />
-            <CommandList>
-              <CommandEmpty>No country found.</CommandEmpty>
+          </PopoverTrigger>
+        <PopoverContent className="w-[400px] p-0 shadow-xl border-border/50" align="start">
+          <Command shouldFilter={true} filter={(value, search) => {
+            if (!search) return 1;
+            const searchLower = search.toLowerCase();
+            const valueLower = value.toLowerCase();
+            // Check if search matches the value or any part of it
+            if (valueLower.includes(searchLower)) return 1;
+            return 0;
+          }}>
+            <CommandInput placeholder="Search country by name..." className="h-12 text-base" />
+            <CommandList className="max-h-[400px]">
+              <CommandEmpty>No country found. Try searching by name.</CommandEmpty>
               {/* Top-level special options */}
               <CommandGroup heading="Popular">
                 {specialOptions.map((opt) => (
                   <CommandItem
                     key={opt.code}
-                    value={opt.code}
-                    onSelect={(currentValue) => {
-                      onChange(currentValue === value ? '' : currentValue);
-                      if (currentValue !== 'US') {
+                    value={`${opt.name} ${opt.code}`}
+                    onSelect={() => {
+                      onChange(opt.code === value ? '' : opt.code);
+                      if (opt.code !== 'US') {
                         onStateChange('');
                       }
                       setOpen(false);
                     }}
-                    className="h-11"
+                    className="h-12 px-3 py-2.5 cursor-pointer hover:bg-accent/50"
                   >
                     <Check
                       className={cn(
-                        'mr-2 h-4 w-4',
+                        'mr-3 h-4 w-4 shrink-0',
                         value === opt.code ? 'opacity-100' : 'opacity-0'
                       )}
                     />
-                    <span className="mr-2">{opt.flag}</span>
-                    {opt.name}
+                    <span className="mr-3 text-lg">{opt.flag}</span>
+                    <span className="text-base">{opt.name}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>
 
-              {/* European countries */}
-              <CommandGroup heading="Europe">
+              {/* All countries */}
+              <CommandGroup heading="All Countries">
                 {countries
                   .filter((c) => c.code !== 'US')
                   .map((country) => (
                     <CommandItem
                       key={country.code}
-                      value={country.code}
-                      onSelect={(currentValue) => {
-                        onChange(currentValue === value ? '' : currentValue);
-                        if (currentValue !== 'US') {
+                      value={`${country.name} ${country.code}`}
+                      onSelect={() => {
+                        onChange(country.code === value ? '' : country.code);
+                        if (country.code !== 'US') {
                           onStateChange('');
                         }
                         setOpen(false);
                       }}
-                      className="h-11"
+                      className="h-12 px-3 py-2.5 cursor-pointer hover:bg-accent/50"
                     >
                       <Check
                         className={cn(
-                          'mr-2 h-4 w-4',
+                          'mr-3 h-4 w-4 shrink-0',
                           value === country.code ? 'opacity-100' : 'opacity-0'
                         )}
                       />
-                      <span className="mr-2">{codeToFlag(country.code)}</span>
-                      {country.name}
+                      <span className="mr-3 text-lg">{codeToFlag(country.code)}</span>
+                      <span className="text-base">{country.name}</span>
                     </CommandItem>
                   ))}
               </CommandGroup>
@@ -145,37 +152,43 @@ export function CountrySelector({
               variant="outline"
               role="combobox"
               aria-expanded={stateOpen}
-              className="min-w-[160px] justify-between h-11 bg-background"
+              className="min-w-[160px] justify-between h-11 bg-white/10 border-white/20 text-[hsl(var(--navbar-foreground))] hover:bg-white/20 hover:border-white/30"
             >
               <span className="truncate">
                 {selectedState ? selectedState.name : 'Select state'}
               </span>
-              <ChevronDown className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 text-[hsl(var(--navbar-foreground))]/70" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[280px] p-0" align="start">
-            <Command>
-              <CommandInput placeholder="Search state..." />
-              <CommandList>
-                <CommandEmpty>No state found.</CommandEmpty>
+          <PopoverContent className="w-[400px] p-0 shadow-xl border-border/50" align="start">
+            <Command shouldFilter={true} filter={(value, search) => {
+              if (!search) return 1;
+              const searchLower = search.toLowerCase();
+              const valueLower = value.toLowerCase();
+              if (valueLower.includes(searchLower)) return 1;
+              return 0;
+            }}>
+              <CommandInput placeholder="Search state by name..." className="h-12 text-base" />
+              <CommandList className="max-h-[400px]">
+                <CommandEmpty>No state found. Try searching by name.</CommandEmpty>
                 <CommandGroup>
                   {usStates.map((state) => (
                     <CommandItem
                       key={state.code}
-                      value={state.code}
-                      onSelect={(currentValue) => {
-                        onStateChange(currentValue === stateValue ? '' : currentValue);
+                      value={`${state.name} ${state.code}`}
+                      onSelect={() => {
+                        onStateChange(state.code === stateValue ? '' : state.code);
                         setStateOpen(false);
                       }}
-                      className="h-11"
+                      className="h-12 px-3 py-2.5 cursor-pointer hover:bg-accent/50"
                     >
                       <Check
                         className={cn(
-                          'mr-2 h-4 w-4',
+                          'mr-3 h-4 w-4 shrink-0',
                           stateValue === state.code ? 'opacity-100' : 'opacity-0'
                         )}
                       />
-                      {state.name}
+                      <span className="text-base">{state.name}</span>
                     </CommandItem>
                   ))}
                 </CommandGroup>

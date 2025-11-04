@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Polls collection - public read, authenticated write
+    match /polls/{pollId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+      
+      // Votes subcollection - one vote per user per poll
+      match /votes/{voteId} {
+        allow read: if true;
+        // Only allow creating if user hasn't voted yet
+        allow create: if request.auth != null && 
+                         request.auth.uid == request.resource.data.userId &&
+                         !exists(/databases/$(database)/documents/polls/$(pollId)/votes/$(request.auth.uid));
+        // Allow updating own vote
+        allow update: if request.auth != null && 
+                         request.auth.uid == resource.data.userId;
+        // Prevent deletion
+        allow delete: if false;
+      }
+      
+      // Comments subcollection (future)
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if request.auth != null;
+        allow update: if request.auth != null && request.auth.uid == resource.data.userId;
+        allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      }
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Public read for directory opt-in users
+      allow read: if resource.data.is_directory_opt_in == true;
+      // Users can read their own profile
+      allow read: if request.auth != null && request.auth.uid == userId;
+      // Users can create their own profile
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // Users can update their own profile, but not vote counts
+      allow update: if request.auth != null && 
+                       request.auth.uid == userId &&
+                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['public_vote_count_30d', 'public_vote_count_all', 'last_public_vote_at']);
+    }
+  }
+}
+

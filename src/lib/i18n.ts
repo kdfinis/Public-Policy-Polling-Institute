@@ -31,7 +31,7 @@ export const translations = {
     'poll.closed': 'Closed',
     'poll.minSample': 'Minimum sample size not yet reached',
     
-    // Categories
+    // Categories (20 total)
     'category.domestic': 'Domestic Policy',
     'category.foreign': 'Foreign Policy',
     'category.economic': 'Economic Policy',
@@ -39,6 +39,20 @@ export const translations = {
     'category.environment': 'Environment',
     'category.healthcare': 'Healthcare',
     'category.education': 'Education',
+    'category.immigration': 'Immigration',
+    'category.criminal': 'Criminal Justice',
+    'category.technology': 'Technology & Privacy',
+    'category.housing': 'Housing & Urban',
+    'category.defense': 'National Defense',
+    'category.energy': 'Energy Policy',
+    'category.trade': 'Trade & Commerce',
+    'category.taxation': 'Taxation',
+    'category.labor': 'Labor & Employment',
+    'category.civil': 'Civil Rights',
+    'category.guns': 'Gun Control',
+    'category.abortion': 'Abortion & Reproductive',
+    'category.infrastructure': 'Infrastructure',
+    'category.climate': 'Climate Change',
     
     // Auth
     'auth.signIn': 'Sign In',

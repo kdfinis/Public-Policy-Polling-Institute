@@ -1,3 +1,4 @@
+import { useMemo, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,35 +18,163 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import { DevConsoleOverlay } from "@/components/DevConsoleOverlay";
 import Voters from "./pages/Voters";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { DemoBanner } from "@/components/DemoBanner";
 
-const queryClient = new QueryClient();
+const App = () => {
+  // Fix memory leak: Create QueryClient inside component with proper configuration
+  const queryClient = useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: 2,
+            refetchOnWindowFocus: false,
+            staleTime: 5 * 60 * 1000, // 5 minutes
+            gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+          },
+          mutations: {
+            retry: 1,
+          },
+        },
+      }),
+    []
+  );
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/browse" element={<Browse />} />
-          <Route path="/poll/:id" element={<PollDetail />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/voters" element={<Voters />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/404" element={<Error404 />} />
-          <Route path="/maintenance" element={<Maintenance />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-      {import.meta.env.DEV && <DevConsoleOverlay />}
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
+          <DemoBanner />
+          <Suspense fallback={null}>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <ErrorBoundary>
+                    <Index />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/browse"
+                element={
+                  <ErrorBoundary>
+                    <Browse />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/poll/:id"
+                element={
+                  <ErrorBoundary>
+                    <PollDetail />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/search"
+                element={
+                  <ErrorBoundary>
+                    <Search />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/notifications"
+                element={
+                  <ErrorBoundary>
+                    <Notifications />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ErrorBoundary>
+                    <Profile />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/profile/:userId"
+                element={
+                  <ErrorBoundary>
+                    <Profile />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/analytics"
+                element={
+                  <ErrorBoundary>
+                    <Analytics />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/voters"
+                element={
+                  <ErrorBoundary>
+                    <Voters />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/terms"
+                element={
+                  <ErrorBoundary>
+                    <Terms />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/login"
+                element={
+                  <ErrorBoundary>
+                    <Login />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/404"
+                element={
+                  <ErrorBoundary>
+                    <Error404 />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="/maintenance"
+                element={
+                  <ErrorBoundary>
+                    <Maintenance />
+                  </ErrorBoundary>
+                }
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route
+                path="*"
+                element={
+                  <ErrorBoundary>
+                    <NotFound />
+                  </ErrorBoundary>
+                }
+              />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+        {import.meta.env.DEV && <DevConsoleOverlay />}
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

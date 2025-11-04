@@ -6,9 +6,21 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
+    host: "localhost",
     // 8080 is occupied by the API; run frontend on 5173 and proxy API
     port: 5173,
+    strictPort: true,
+    cors: true,
+    hmr: {
+      protocol: "ws",
+      host: "localhost",
+      clientPort: 5173,
+      overlay: false, // Disable error overlay to prevent connection issues
+    },
+    watch: {
+      usePolling: false, // Disable polling to reduce CPU usage
+      interval: 1000, // Check for changes every second
+    },
     proxy: {
       "/api": {
         target: "http://localhost:8080",
@@ -23,6 +35,9 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
       },
     },
+  },
+  define: {
+    __VITE_IS_DEV__: JSON.stringify(true),
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

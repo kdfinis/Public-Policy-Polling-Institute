@@ -11,6 +11,7 @@ function mapDocToPoll(d: any): Poll {
   return {
     id: d.id,
     title: d.title ?? 'Untitled',
+    description: d.description,
     category: d.category ?? 'Domestic Policy',
     country: d.country ?? 'US',
     region: d.state ?? undefined,
@@ -18,6 +19,8 @@ function mapDocToPoll(d: any): Poll {
     noPercent: Math.round(d.stats?.noPercent ?? 50),
     totalVotes: Math.round(d.stats?.totalVotes ?? 0),
     status: (d.status ?? 'open') as 'open' | 'closed',
+    articleUrl: d.articleUrl,
+    imageUrl: d.imageUrl,
   };
 }
 

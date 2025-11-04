@@ -3,7 +3,6 @@ import {
   collection,
   getDocs,
   limit,
-  orderBy,
   query,
   where,
   startAfter,
@@ -50,14 +49,14 @@ export async function fetchTopVoters(limitCount = 12): Promise<PublicUser[]> {
   const q = query(
     usersRef,
     where('is_directory_opt_in', '==', true),
-    orderBy('last_public_vote_at', 'desc'),
-    limit(limitCount)
+    limit(limitCount * 2) // Fetch more to sort client-side
   );
   const snap = await getDocs(q);
   const list: PublicUser[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
   return list
     .map((u) => ({ ...u, score_top: computeScoreTop(u) }))
-    .sort((a, b) => (b.score_top ?? 0) - (a.score_top ?? 0));
+    .sort((a, b) => (b.score_top ?? 0) - (a.score_top ?? 0))
+    .slice(0, limitCount);
 }
 
 export async function fetchTopPoliticians(limitCount = 12): Promise<PublicUser[]> {
@@ -67,14 +66,14 @@ export async function fetchTopPoliticians(limitCount = 12): Promise<PublicUser[]
     usersRef,
     where('is_directory_opt_in', '==', true),
     where('is_politician', '==', true),
-    orderBy('last_public_vote_at', 'desc'),
-    limit(limitCount)
+    limit(limitCount * 2) // Fetch more to sort client-side
   );
   const snap = await getDocs(q);
   const list: PublicUser[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
   return list
     .map((u) => ({ ...u, score_top: computeScoreTop(u) }))
-    .sort((a, b) => (b.score_top ?? 0) - (a.score_top ?? 0));
+    .sort((a, b) => (b.score_top ?? 0) - (a.score_top ?? 0))
+    .slice(0, limitCount);
 }
 
 export interface DirectoryFilter {
@@ -99,14 +98,32 @@ export async function fetchDirectoryPage(filters: DirectoryFilter): Promise<Dire
   if (type === 'politician') clauses.push(where('is_politician', '==', true));
   if (type === 'public') clauses.push(where('is_politician', '==', false));
 
-  let q = query(usersRef, ...clauses, orderBy('last_public_vote_at', 'desc'), limit(pageSize));
+  // Remove orderBy to avoid index requirement - sort client-side instead
+  let q = query(usersRef, ...clauses, limit(pageSize + 10)); // Fetch extra for sorting
   if (cursor) {
-    q = query(usersRef, ...clauses, orderBy('last_public_vote_at', 'desc'), startAfter(cursor), limit(pageSize));
+    q = query(usersRef, ...clauses, startAfter(cursor), limit(pageSize + 10));
   }
 
   const snap = await getDocs(q);
-  const items: PublicUser[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
-  const nextCursor = snap.docs.length === pageSize ? snap.docs[snap.docs.length - 1] : null;
+  let items: PublicUser[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+  
+  // Sort by last_public_vote_at client-side
+  items.sort((a, b) => {
+    const aDate = a.last_public_vote_at instanceof Date 
+      ? a.last_public_vote_at.getTime()
+      : a.last_public_vote_at?.seconds 
+        ? a.last_public_vote_at.seconds * 1000 
+        : 0;
+    const bDate = b.last_public_vote_at instanceof Date 
+      ? b.last_public_vote_at.getTime()
+      : b.last_public_vote_at?.seconds 
+        ? b.last_public_vote_at.seconds * 1000 
+        : 0;
+    return bDate - aDate; // Descending
+  });
+  
+  items = items.slice(0, pageSize);
+  const nextCursor = snap.docs.length > pageSize ? snap.docs[snap.docs.length - 1] : null;
   return { items, nextCursor };
 }
 

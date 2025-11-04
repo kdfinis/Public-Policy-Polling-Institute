@@ -39,10 +39,21 @@ All colors MUST be HSL.
     --primary-hover: 217 30% 26%;
     --primary-active: 217 30% 22%;
     
-    /* Secondary: Warm neutral */
-    --secondary: 210 18% 90%;
-    --secondary-foreground: 217 25% 22%;
-    --secondary-hover: 210 18% 86%;
+    /* Secondary: Navy blue */
+    --secondary: 220 50% 25%;
+    --secondary-foreground: 210 22% 98%;
+    --secondary-hover: 220 50% 30%;
+    --secondary-active: 220 50% 20%;
+    
+    /* Navbar: Navy background */
+    --navbar: 220 50% 25%;
+    --navbar-foreground: 210 22% 98%;
+    
+    /* Category accent: Complementary warm amber to navy */
+    --category-accent: 40 85% 55%;
+    --category-accent-foreground: 220 50% 15%;
+    --category-accent-light: 40 85% 95%;
+    --category-accent-border: 40 85% 70%;
     
     /* Accent: Institutional sage green */
     --accent: 152 26% 42%;

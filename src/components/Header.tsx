@@ -1,7 +1,10 @@
-import { Globe2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Globe2, LogIn, User } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { CountrySelector } from './CountrySelector';
 import { LanguageSelector } from './LanguageSelector';
+import { CategorySelector } from './CategorySelector';
+import { Button } from './ui/button';
+import { useAuth } from '@/hooks/use-auth';
 
 interface HeaderProps {
   selectedCountry: string;
@@ -20,19 +23,23 @@ export function Header({
   onStateChange,
   onLanguageChange,
 }: HeaderProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   return (
-    <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
+    <header className="sticky top-0 z-50 bg-[hsl(var(--navbar))] border-b border-secondary/20 shadow-md">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <Globe2 className="h-6 w-6 text-primary" />
-          <span className="font-semibold text-lg text-foreground hidden sm:inline">
+          <Globe2 className="h-6 w-6 text-[hsl(var(--navbar-foreground))]" />
+          <span className="font-semibold text-lg text-[hsl(var(--navbar-foreground))] hidden sm:inline">
             Public Policy Polling Institute
           </span>
         </Link>
 
-        {/* Center Selectors */}
-        <div className="flex items-center gap-2 flex-1 justify-center max-w-lg">
+        {/* Right Selectors & Actions */}
+        <div className="flex items-center gap-2">
+          <CategorySelector language={selectedLanguage} />
           <CountrySelector
             value={selectedCountry}
             stateValue={selectedState}
@@ -40,16 +47,42 @@ export function Header({
             onStateChange={onStateChange}
           />
           <LanguageSelector value={selectedLanguage} onChange={onLanguageChange} />
-        </div>
-
-        {/* Right actions */}
-        <div className="flex items-center gap-3">
-          <Link to="/voters" className="hidden md:inline text-sm font-medium text-foreground hover:text-primary">
-            Voters
-          </Link>
-          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-            <span className="text-sm font-medium text-muted-foreground">U</span>
-          </div>
+          <Button
+            variant="outline"
+            asChild
+            className="hidden md:inline-flex h-11 bg-white/10 border-white/20 text-[hsl(var(--navbar-foreground))] hover:bg-white/20 hover:border-white/30"
+          >
+            <Link to="/voters">
+              Voters
+            </Link>
+          </Button>
+          {user ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/profile')}
+              className="hidden md:inline-flex items-center gap-2 text-[hsl(var(--navbar-foreground))] hover:bg-white/10"
+            >
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt={user.displayName || 'User'} className="w-8 h-8 rounded-full" />
+                ) : (
+                  <User className="h-4 w-4 text-[hsl(var(--navbar-foreground))]" />
+                )}
+              </div>
+              <span className="text-sm font-medium">{user.displayName || 'Profile'}</span>
+            </Button>
+          ) : (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => navigate('/login')}
+              className="hidden md:inline-flex items-center gap-2 bg-white text-[hsl(var(--navbar))] hover:bg-white/90"
+            >
+              <LogIn className="h-4 w-4" />
+              <span className="font-medium">Login</span>
+            </Button>
+          )}
         </div>
       </div>
     </header>
