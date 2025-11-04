@@ -33,16 +33,33 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: |
+          echo "Building with GITHUB_REPOSITORY=${{ github.repository }}"
+          npm run build
+          echo "Build complete. Checking dist contents:"
+          ls -la dist/ | head -10
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
-          # This ensures base path is set correctly
+
+      - name: Verify build output
+        run: |
+          echo "Checking index.html base path:"
+          grep -o 'src="/[^"]*"' dist/index.html | head -2
+          echo "Verifying .nojekyll and 404.html will be created..."
 
       - name: SPA fallback for GitHub Pages
         run: cp dist/index.html dist/404.html
 
       - name: Add .nojekyll file
         run: touch dist/.nojekyll
+
+      - name: Verify deployment files
+        run: |
+          echo "Deployment files:"
+          ls -la dist/ | grep -E "(index|404|\.nojekyll)"
+          test -f dist/.nojekyll && echo "✅ .nojekyll exists" || echo "❌ .nojekyll missing"
+          test -f dist/404.html && echo "✅ 404.html exists" || echo "❌ 404.html missing"
+          test -f dist/index.html && echo "✅ index.html exists" || echo "❌ index.html missing"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
