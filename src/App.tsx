@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, HashRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Browse from "./pages/Browse";
 import PollDetail from "./pages/PollDetail";
@@ -42,18 +42,144 @@ const App = () => {
     []
   );
 
+  const isGitHubPages = import.meta.env.BASE_URL !== "/";
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter
-          basename={import.meta.env.BASE_URL}
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
+        {isGitHubPages ? (
+          <HashRouter>
+            <Suspense fallback={null}>
+              <div className="w-[90%] mx-auto">
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      <ErrorBoundary>
+                        <Index />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/browse"
+                    element={
+                      <ErrorBoundary>
+                        <Browse />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/poll/:id"
+                    element={
+                      <ErrorBoundary>
+                        <PollDetail />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route path="/embed/poll/:id" element={<EmbedPoll />} />
+                  <Route
+                    path="/search"
+                    element={
+                      <ErrorBoundary>
+                        <Search />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/notifications"
+                    element={
+                      <ErrorBoundary>
+                        <Notifications />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/about"
+                    element={
+                      <ErrorBoundary>
+                        <About />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ErrorBoundary>
+                        <Profile />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/analytics"
+                    element={
+                      <ErrorBoundary>
+                        <Analytics />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/voters"
+                    element={
+                      <ErrorBoundary>
+                        <Voters />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/terms"
+                    element={
+                      <ErrorBoundary>
+                        <Terms />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/login"
+                    element={
+                      <ErrorBoundary>
+                        <Login />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/404"
+                    element={
+                      <ErrorBoundary>
+                        <Error404 />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/maintenance"
+                    element={
+                      <ErrorBoundary>
+                        <Maintenance />
+                      </ErrorBoundary>
+                    }
+                  />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route
+                    path="*"
+                    element={
+                      <ErrorBoundary>
+                        <NotFound />
+                      </ErrorBoundary>
+                    }
+                  />
+                </Routes>
+              </div>
+            </Suspense>
+          </HashRouter>
+        ) : (
+          <BrowserRouter
+            basename={import.meta.env.BASE_URL}
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
           <Suspense fallback={null}>
             <div className="w-[90%] mx-auto">
               <Routes>
@@ -177,7 +303,8 @@ const App = () => {
               </Routes>
             </div>
           </Suspense>
-        </BrowserRouter>
+          </BrowserRouter>
+        )}
         {import.meta.env.DEV && <DevConsoleOverlay />}
       </TooltipProvider>
     </QueryClientProvider>
