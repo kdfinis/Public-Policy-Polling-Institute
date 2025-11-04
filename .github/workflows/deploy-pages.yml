@@ -21,6 +21,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -31,8 +34,7 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          GITHUB_PAGES: "true"
+        # GITHUB_REPOSITORY is automatically available in GitHub Actions
 
       - name: SPA fallback for GitHub Pages
         run: cp dist/index.html dist/404.html
