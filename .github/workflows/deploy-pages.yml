@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, PPPI-V0.1 ]
   workflow_dispatch:
 
 permissions:
