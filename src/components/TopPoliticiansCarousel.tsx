@@ -56,7 +56,9 @@ export function TopPoliticiansCarousel({ compact = false }: { compact?: boolean 
     return (
       <div className="grid grid-cols-2 gap-3">
         {six.map((u) => (
-          <VoterCard key={u.id} user={u} />
+          <div key={u.id} className="w-full">
+            <VoterCard user={u} />
+          </div>
         ))}
       </div>
     );
@@ -70,7 +72,9 @@ export function TopPoliticiansCarousel({ compact = false }: { compact?: boolean 
       <Card className="p-4 border-border relative">
         <div className="grid grid-cols-2 gap-3">
           {six.map((u) => (
-            <VoterCard key={u.id} user={u} />
+            <div key={u.id} className="w-full">
+              <VoterCard user={u} />
+            </div>
           ))}
         </div>
       </Card>

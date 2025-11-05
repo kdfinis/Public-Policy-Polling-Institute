@@ -21,6 +21,7 @@ import { DevConsoleOverlay } from "@/components/DevConsoleOverlay";
 import Voters from "./pages/Voters";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import EmbedPoll from "./pages/EmbedPoll";
+import VoterProfile from "./pages/VoterProfile";
 
 const App = () => {
   // Fix memory leak: Create QueryClient inside component with proper configuration
@@ -124,6 +125,14 @@ const App = () => {
                     element={
                       <ErrorBoundary>
                         <Voters />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/voter/:id"
+                    element={
+                      <ErrorBoundary>
+                        <VoterProfile />
                       </ErrorBoundary>
                     }
                   />
@@ -256,6 +265,14 @@ const App = () => {
                   element={
                     <ErrorBoundary>
                       <Voters />
+                    </ErrorBoundary>
+                  }
+                />
+                <Route
+                  path="/voter/:id"
+                  element={
+                    <ErrorBoundary>
+                      <VoterProfile />
                     </ErrorBoundary>
                   }
                 />

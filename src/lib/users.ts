@@ -1,6 +1,8 @@
 import { db } from '@/lib/firebase';
 import {
   collection,
+  doc,
+  getDoc,
   getDocs,
   limit,
   query,
@@ -127,4 +129,156 @@ export async function fetchDirectoryPage(filters: DirectoryFilter): Promise<Dire
   return { items, nextCursor };
 }
 
+// Lovable additions (mock implementations)
+export interface VoterProfile extends PublicUser {
+  rank?: number;
+  created_at?: string;
+}
+
+export interface VoterActivityPoint {
+  date: string;
+  votes: number;
+}
+
+export interface VoterBreakdownItem {
+  label: string;
+  count: number;
+  percentage: number;
+}
+
+export interface VoterBreakdown {
+  byPosition: VoterBreakdownItem[];
+  byCategory: VoterBreakdownItem[];
+  byRegion: VoterBreakdownItem[];
+}
+
+export interface RecentVote {
+  id: string;
+  pollId: string;
+  pollTitle: string;
+  choice: 'yes' | 'no';
+  votedAt: string;
+  category?: string;
+}
+
+export async function fetchVoterProfile(voterId: string): Promise<VoterProfile | null> {
+  if (!db) return null;
+  // Try to fetch from Firestore first
+  try {
+    const userRef = doc(db, 'users', voterId);
+    const userDoc = await getDoc(userRef);
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      return {
+        id: userDoc.id,
+        ...data,
+        rank: data.rank || undefined,
+        created_at: data.created_at || data.createdAt?.toDate?.()?.toISOString() || undefined,
+      } as VoterProfile;
+    }
+  } catch (error) {
+    console.error('Error fetching voter profile:', error);
+  }
+  
+  // Mock implementation fallback
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const mockProfile: VoterProfile = {
+    id: voterId,
+    display_name: 'John Doe',
+    is_directory_opt_in: true,
+    is_politician: false,
+    gender: 'male',
+    public_vote_count_30d: 45,
+    public_vote_count_all: 328,
+    verification_level: 2,
+    score_top: 87,
+    rank: 42,
+    created_at: '2023-06-15',
+    last_public_vote_at: new Date(),
+    social_links: {
+      linkedin: 'https://linkedin.com/in/johndoe',
+      x: 'https://x.com/johndoe'
+    }
+  };
+  
+  return mockProfile;
+}
+
+export async function fetchVoterActivity(voterId: string, range: string): Promise<VoterActivityPoint[]> {
+  // Mock implementation
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const points: VoterActivityPoint[] = [];
+  const now = new Date();
+  const days = range === '1W' ? 7 : range === '1M' ? 30 : range === '3M' ? 90 : range === '1Y' ? 365 : 730;
+  
+  for (let i = days; i >= 0; i -= Math.max(1, Math.floor(days / 20))) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    points.push({
+      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      votes: Math.floor(Math.random() * 10) + 1
+    });
+  }
+  
+  return points;
+}
+
+export async function fetchVoterBreakdown(voterId: string): Promise<VoterBreakdown> {
+  // Mock implementation
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  return {
+    byPosition: [
+      { label: 'Agree', count: 198, percentage: 60 },
+      { label: 'Disagree', count: 130, percentage: 40 }
+    ],
+    byCategory: [
+      { label: 'Economy', count: 85, percentage: 26 },
+      { label: 'Healthcare', count: 72, percentage: 22 },
+      { label: 'Education', count: 58, percentage: 18 },
+      { label: 'Environment', count: 54, percentage: 16 },
+      { label: 'Other', count: 59, percentage: 18 }
+    ],
+    byRegion: [
+      { label: 'Federal', count: 156, percentage: 48 },
+      { label: 'State', count: 98, percentage: 30 },
+      { label: 'Local', count: 74, percentage: 22 }
+    ]
+  };
+}
+
+export async function fetchRecentVotes(voterId: string, limit: number): Promise<RecentVote[]> {
+  // Mock implementation
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const mockVotes: RecentVote[] = [
+    {
+      id: '1',
+      pollId: 'AU0DgZn7wAelMbBdferg',
+      pollTitle: 'Should we increase funding for public education?',
+      choice: 'yes',
+      votedAt: new Date(Date.now() - 86400000).toISOString(),
+      category: 'Education'
+    },
+    {
+      id: '2',
+      pollId: 'poll2',
+      pollTitle: 'Do you support renewable energy initiatives?',
+      choice: 'yes',
+      votedAt: new Date(Date.now() - 172800000).toISOString(),
+      category: 'Environment'
+    },
+    {
+      id: '3',
+      pollId: 'poll3',
+      pollTitle: 'Should healthcare be universal?',
+      choice: 'no',
+      votedAt: new Date(Date.now() - 259200000).toISOString(),
+      category: 'Healthcare'
+    }
+  ];
+  return mockVotes.slice(0, limit);
+}
 
