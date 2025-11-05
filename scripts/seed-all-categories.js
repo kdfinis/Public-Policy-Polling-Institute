@@ -1,4 +1,5 @@
 import admin from 'firebase-admin';
+import fs from 'fs';
 
 // Support both file-based and environment variable credentials
 let serviceAccount;
@@ -9,13 +10,17 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     console.error('❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:', error.message);
     process.exit(1);
   }
-} else {
+} else if (fs.existsSync('./serviceAccountKey.json')) {
   try {
-    serviceAccount = await import('../serviceAccountKey.json', { assert: { type: 'json' } }).then(m => m.default);
+    const fileContent = fs.readFileSync('./serviceAccountKey.json', 'utf8');
+    serviceAccount = JSON.parse(fileContent);
   } catch (error) {
-    console.error('❌ Failed to load serviceAccountKey.json. Set FIREBASE_SERVICE_ACCOUNT env var or provide serviceAccountKey.json');
+    console.error('❌ Failed to load serviceAccountKey.json:', error.message);
     process.exit(1);
   }
+} else {
+  console.error('❌ FIREBASE_SERVICE_ACCOUNT env var not set and serviceAccountKey.json not found');
+  process.exit(1);
 }
 
 admin.initializeApp({

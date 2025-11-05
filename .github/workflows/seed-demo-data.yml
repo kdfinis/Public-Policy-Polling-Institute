@@ -27,14 +27,21 @@ jobs:
 
       - name: Seed polls first
         run: |
-          echo "$FIREBASE_SERVICE_ACCOUNT" > serviceAccountKey.json
-          npm run seed:all || echo "⚠️  Polls seeding failed or polls already exist"
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "⚠️  FIREBASE_SERVICE_ACCOUNT secret not set. Skipping seeding."
+            exit 0
+          fi
+          node scripts/seed-all-categories.js || echo "⚠️  Polls seeding failed or polls already exist"
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       - name: Seed demo data (users and votes)
         run: |
-          node scripts/seed-demo-ci.js
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "⚠️  FIREBASE_SERVICE_ACCOUNT secret not set. Skipping seeding."
+            exit 0
+          fi
+          node scripts/seed-demo-ci.js || echo "⚠️  Demo data seeding failed or already exists"
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 

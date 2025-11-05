@@ -98,22 +98,26 @@ jobs:
 
       - name: Seed polls (if not exists)
         run: |
-          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
-            node scripts/seed-all-categories.js || echo "⚠️  Polls seeding skipped (may already exist)"
-          else
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
             echo "⚠️  FIREBASE_SERVICE_ACCOUNT secret not set. Skipping poll seeding."
+            echo "💡 Add FIREBASE_SERVICE_ACCOUNT secret to enable demo data seeding."
+            exit 0
           fi
+          node scripts/seed-all-categories.js || echo "⚠️  Polls seeding skipped (may already exist)"
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        continue-on-error: true
 
       - name: Seed demo users and votes (if not exists)
         run: |
-          if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
-            node scripts/seed-demo-ci.js || echo "⚠️  Demo data seeding skipped (may already exist)"
-          else
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
             echo "⚠️  FIREBASE_SERVICE_ACCOUNT secret not set. Skipping demo data seeding."
+            echo "💡 Add FIREBASE_SERVICE_ACCOUNT secret to enable demo data seeding."
+            exit 0
           fi
+          node scripts/seed-demo-ci.js || echo "⚠️  Demo data seeding skipped (may already exist)"
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        continue-on-error: true
 
 
