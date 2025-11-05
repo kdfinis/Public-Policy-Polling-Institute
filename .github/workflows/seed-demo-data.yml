@@ -1,0 +1,45 @@
+name: Seed Demo Data
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/seed-demo-data.yml'
+      - 'scripts/seed-demo-ci.js'
+      - 'scripts/seed-all-categories.js'
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Seed polls first
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > serviceAccountKey.json
+          npm run seed:all || echo "⚠️  Polls seeding failed or polls already exist"
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Seed demo data (users and votes)
+        run: |
+          node scripts/seed-demo-ci.js
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f serviceAccountKey.json
+

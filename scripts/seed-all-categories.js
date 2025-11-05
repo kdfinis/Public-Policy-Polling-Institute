@@ -1,5 +1,22 @@
 import admin from 'firebase-admin';
-import serviceAccount from '../serviceAccountKey.json' assert { type: 'json' };
+
+// Support both file-based and environment variable credentials
+let serviceAccount;
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } catch (error) {
+    console.error('❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:', error.message);
+    process.exit(1);
+  }
+} else {
+  try {
+    serviceAccount = await import('../serviceAccountKey.json', { assert: { type: 'json' } }).then(m => m.default);
+  } catch (error) {
+    console.error('❌ Failed to load serviceAccountKey.json. Set FIREBASE_SERVICE_ACCOUNT env var or provide serviceAccountKey.json');
+    process.exit(1);
+  }
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -274,6 +291,13 @@ const articleUrls = [
 ];
 
 async function seedAllPolls() {
+  // Check if polls already exist
+  const existingPolls = await db.collection('polls').limit(1).get();
+  if (!existingPolls.empty) {
+    console.log('⚠️  Polls already exist. Skipping seed. Use --force to overwrite.\n');
+    return;
+  }
+  
   console.log('🌱 Seeding 200 polls (10 per category across 20 categories)...');
   const batch = db.batch();
   let totalCount = 0;
