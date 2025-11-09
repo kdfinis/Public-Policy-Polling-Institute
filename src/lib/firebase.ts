@@ -1,14 +1,15 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore, setLogLevel } from 'firebase/firestore';
+import { publicFirebaseConfig } from '@/firebase.public';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || publicFirebaseConfig.apiKey,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || publicFirebaseConfig.authDomain,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || publicFirebaseConfig.projectId,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || publicFirebaseConfig.storageBucket,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || publicFirebaseConfig.messagingSenderId,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || publicFirebaseConfig.appId,
 };
 
 // Validate Firebase config before initialization
@@ -54,8 +55,8 @@ if (isValidConfig) {
 export { app, auth };
 
 // Only initialize Firestore when real config is present to avoid noisy errors in dev
-const hasRealProject = !!firebaseConfig.projectId && 
-  firebaseConfig.projectId !== 'placeholder' && 
+const hasRealProject = !!firebaseConfig.projectId &&
+  firebaseConfig.projectId !== 'placeholder' &&
   firebaseConfig.projectId !== 'YOUR_PROJECT_ID';
 
 let db: Firestore | null = null;
